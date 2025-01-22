@@ -9,15 +9,6 @@ from transformers import (
 from datasets import Dataset
 import json
 
-def load_chat_data(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    
-    return Dataset.from_dict({
-        'input_text': [item['input'] for item in data['conversations']],
-        'output_text': [item['output'] for item in data['conversations']]
-    })
-
 def tokenize_conversations(examples, tokenizer):
     conversations = [
         f"User: {input_text}\nFriend: {output_text}" 
@@ -47,7 +38,7 @@ def train_model():
     dataset = load_chat_data('training_data.json')
     train_val = dataset.train_test_split(test_size=0.1)
 
-    # Tokenize datasets
+    # Tokenize datasets with labels
     tokenized_train = train_val['train'].map(
         lambda x: tokenize_conversations(x, tokenizer),
         batched=True,
@@ -59,7 +50,7 @@ def train_model():
         remove_columns=train_val['test'].column_names
     )
 
-    # Configure training
+    # Training arguments
     training_args = TrainingArguments(
         output_dir="./friend_chat_model",
         num_train_epochs=3,
@@ -73,7 +64,7 @@ def train_model():
         learning_rate=5e-5
     )
 
-    # Initialize trainer
+    # Initialize trainer with data collator
     trainer = Trainer(
         model=model,
         args=training_args,
