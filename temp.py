@@ -1,85 +1,32 @@
-import torch
-from transformers import (
-    GPT2LMHeadModel, 
-    GPT2Tokenizer,
-    TrainingArguments,
-    Trainer,
-    DataCollatorForLanguageModeling
-)
-from datasets import Dataset
-import json
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def tokenize_conversations(examples, tokenizer):
-    conversations = [
-        f"User: {input_text}\nFriend: {output_text}" 
-        for input_text, output_text in zip(examples['input_text'], examples['output_text'])
-    ]
-    
-    result = tokenizer(
-        conversations,
-        truncation=True,
-        padding='max_length',
-        max_length=512,
-        return_tensors="pt"
-    )
-    
-    # Set labels same as input_ids for casual language modeling
-    result["labels"] = result["input_ids"].clone()
-    
-    return result
+# Initialize tokenizer with padding token
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+tokenizer.pad_token = tokenizer.eos_token
 
-def train_model():
-    # Initialize model and tokenizer
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-    tokenizer.pad_token = tokenizer.eos_token
-    model = GPT2LMHeadModel.from_pretrained('gpt2')
+# Initialize model with pad token ID
+model = AutoModelForCausalLM.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
 
-    # Load and prepare dataset
-    dataset = load_chat_data('training_data.json')
-    train_val = dataset.train_test_split(test_size=0.1)
+while(True):
+    prompt = input("You :")
 
-    # Tokenize datasets with labels
-    tokenized_train = train_val['train'].map(
-        lambda x: tokenize_conversations(x, tokenizer),
-        batched=True,
-        remove_columns=train_val['train'].column_names
-    )
-    tokenized_val = train_val['test'].map(
-        lambda x: tokenize_conversations(x, tokenizer),
-        batched=True,
-        remove_columns=train_val['test'].column_names
+    # Get input IDs and attention mask
+    inputs = tokenizer(
+        prompt,
+        return_tensors="pt",
+        padding=True,
+        return_attention_mask=True
     )
 
-    # Training arguments
-    training_args = TrainingArguments(
-        output_dir="./friend_chat_model",
-        num_train_epochs=3,
-        per_device_train_batch_size=4,
-        per_device_eval_batch_size=4,
-        eval_steps=100,
-        save_steps=200,
-        warmup_steps=100,
-        eval_strategy="steps",
-        logging_dir='./logs',
-        learning_rate=5e-5
+    # Generate with attention mask
+    gen_tokens = model.generate(
+        input_ids=inputs["input_ids"],
+        attention_mask=inputs["attention_mask"],
+        do_sample=True,
+        temperature=0.9,
+        max_length=100,
+        pad_token_id=tokenizer.eos_token_id
     )
 
-    # Initialize trainer with data collator
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=tokenized_train,
-        eval_dataset=tokenized_val,
-        data_collator=DataCollatorForLanguageModeling(
-            tokenizer=tokenizer, 
-            mlm=False
-        )
-    )
-
-    # Train and save
-    trainer.train()
-    model.save_pretrained("./friend_chat_model")
-    tokenizer.save_pretrained("./friend_chat_model")
-
-if __name__ == "__main__":
-    train_model()
+    gen_text = tokenizer.batch_decode(gen_tokens)[0]
+    print(gen_text)
