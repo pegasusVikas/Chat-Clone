@@ -1,32 +1,29 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from unsloth import FastLanguageModel
+from transformers import TextStreamer
+max_seq_length = 2048 # Choose any! We auto support RoPE Scaling internally!
+dtype = None # None for auto detection. Float16 for Tesla T4, V100, Bfloat16 for Ampere+
+load_in_4bit = True # Use 4bit quantization to reduce memory usage. Can be False.
+model, tokenizer = FastLanguageModel.from_pretrained(
+model_name = "lora_model", # YOUR MODEL YOU USED FOR TRAINING
+max_seq_length = max_seq_length,
+dtype = dtype,
+load_in_4bit = load_in_4bit,
+)
+FastLanguageModel.for_inference(model) # Enable native 2x faster inference
 
-# Initialize tokenizer with padding token
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-tokenizer.pad_token = tokenizer.eos_token
+messages = [
+{"role": "user", "content": "Describe a tall tower in the capital of France."},
+]
+inputs = tokenizer.apply_chat_template(
+messages,
+tokenize = True,
+add_generation_prompt = True, # Must add for generation
+return_tensors = "pt",
+).to("cuda")
 
-# Initialize model with pad token ID
-model = AutoModelForCausalLM.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
 
-while(True):
-    prompt = input("You :")
+text_streamer = TextStreamer(tokenizer, skip_prompt = True)
+_ = model.generate(input_ids = inputs, streamer = text_streamer, max_new_tokens = 128,
+            use_cache = True, temperature = 1.5, min_p = 0.1)
 
-    # Get input IDs and attention mask
-    inputs = tokenizer(
-        prompt,
-        return_tensors="pt",
-        padding=True,
-        return_attention_mask=True
-    )
-
-    # Generate with attention mask
-    gen_tokens = model.generate(
-        input_ids=inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],
-        do_sample=True,
-        temperature=0.9,
-        max_length=100,
-        pad_token_id=tokenizer.eos_token_id
-    )
-
-    gen_text = tokenizer.batch_decode(gen_tokens)[0]
-    print(gen_text)
+model.save_pretrained_merged("merged_model", tokenizer, save_method = "merged_16bit",)
