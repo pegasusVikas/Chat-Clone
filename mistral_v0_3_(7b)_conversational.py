@@ -126,7 +126,7 @@ def main():
 
     tokenizer = get_chat_template(
         tokenizer,
-        chat_template = "chatml", # Supports zephyr, chatml, mistral, llama, alpaca, vicuna, vicuna_old, unsloth
+        chat_template = "mistral", # Supports zephyr, chatml, mistral, llama, alpaca, vicuna, vicuna_old, unsloth
         mapping = {"role" : "from", "content" : "value", "user" : "human", "assistant" : "gpt"}, # ShareGPT style
         map_eos_token = True, # Maps <|im_end|> to </s> instead
     )
