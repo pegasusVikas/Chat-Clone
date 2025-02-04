@@ -1,0 +1,21 @@
+// filepath: .vscode/launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "python": "/home/vikas/miniconda3/envs/unsloth_env/bin/python",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    ],
+    "python.defaultInterpreterPath": "/home/vikas/miniconda3/envs/unsloth_env/bin/python",
+    "python.envFile": "${workspaceFolder}/.env"
+}

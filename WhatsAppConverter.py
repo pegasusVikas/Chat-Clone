@@ -113,7 +113,7 @@ class WhatsAppConverter:
 # Example usage
 if __name__ == "__main__":
     # Example usage of the converter
-    converter = WhatsAppConverter(friend_name="Alien")  # Replace with your friend's name
+    converter = WhatsAppConverter(friend_name="Vikas Gangadevi")  # Replace with your friend's name
     converter.convert_chat(
         input_file="whatsapp_chat.txt",
         output_file="training_data.json"
