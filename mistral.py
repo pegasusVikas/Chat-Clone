@@ -124,13 +124,16 @@ def main():
     '''
     def convert_format(dataset):
         converted_data = []
-        
-        for item in dataset["conversations"]:
+        conversations = []
+        for index,item in enumerate(dataset["conversations"]):
             conversation = [
                 {"role": "user", "content": item["input"]},
                 {"role": "assistant", "content": item["output"]}
             ]
-            converted_data.append({"conversations": conversation})
+            conversations.extend(conversation)
+            if (index+1) % 20 == 0 or (index+1) == dataset.num_rows:
+                converted_data.append({"conversations": conversations})
+                conversations = []
         return Dataset.from_list(converted_data)
     pass
 
@@ -209,7 +212,7 @@ def main():
         trainer,
         instruction_part = "<|start_header_id|>user<|end_header_id|>\n\n",
         response_part = "<|start_header_id|>assistant<|end_header_id|>\n\n",
-    )
+    )    
 
     """We verify masking is actually done:"""
 

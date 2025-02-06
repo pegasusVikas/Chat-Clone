@@ -66,7 +66,7 @@ def main():
     ] # More models at https://huggingface.co/unsloth
     print("Choosing model")
     model, tokenizer = FastLanguageModel.from_pretrained(
-        model_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B", # or choose "unsloth/Llama-3.2-1B-Instruct" or "unsloth/Llama-3.2-3B-Instruct"
+        model_name = "unsloth/Llama-3.2-3B-Instruct", # or choose "unsloth/Llama-3.2-1B-Instruct" or "unsloth/Llama-3.2-3B-Instruct"
         max_seq_length = max_seq_length,
         dtype = dtype,
         load_in_4bit = load_in_4bit,
@@ -209,7 +209,7 @@ def main():
         trainer,
         instruction_part = "<|start_header_id|>user<|end_header_id|>\n\n",
         response_part = "<|start_header_id|>assistant<|end_header_id|>\n\n",
-    )
+    )    
 
     """We verify masking is actually done:"""
 
@@ -350,7 +350,8 @@ def main():
     """
 
     # Merge to 16bit
-    if True: model.save_pretrained_merged("model", tokenizer, save_method = "merged_16bit",)
+    if True:
+        model.save_pretrained_merged("model", tokenizer, save_method = "merged_16bit",)
     if False: model.push_to_hub_merged("hf/model", tokenizer, save_method = "merged_16bit", token = "")
 
     # Merge to 4bit
