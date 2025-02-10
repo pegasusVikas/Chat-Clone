@@ -32,12 +32,28 @@ pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 pip install --no-deps trl peft accelerate bitsandbytes
 ```
 ##### Or Option 2:
-```
+```sh
 conda env create -f environment.yml
 conda activate unsloth_env
 ```
 
 
 ## How to run
+#### 1. Activate env
 ```sh
-conda install ipdb pytest
+conda activate unsloth_env
+```
+#### 2. Export WhatsApp chats and put it in the current directory with file name as **whatsapp_chat.txt**
+#### 3. Run WhatsAppConverter.py
+It converts the **whatsapp_chat.txt** into training data ( training_data.json )
+```sh
+python WhatsAppConverter.py
+```
+your data is ready now you can use one of the 3 trainers
+
+### Mistral 7B
+- Uses unsloth with LoRA finetunning method
+- Fast 
+```sh
+python WhatsAppConverter.py
+```
