@@ -378,7 +378,7 @@ def main():
     # Remember to go to https://huggingface.co/settings/tokens for a token!
     # And change hf to your username!
     if False: model.push_to_hub_gguf("hf/model", tokenizer, token = "")
-    print("Saving to GGUF")
+    
     # Save to 16bit GGUF
     if False: model.save_pretrained_gguf("model", tokenizer, quantization_method = "f16")
     if False: model.push_to_hub_gguf("hf/model", tokenizer, quantization_method = "f16", token = "")

@@ -24,3 +24,4 @@ lora_model/
 merged_model/
 model/
 outputs/
+temp/
