@@ -8,7 +8,7 @@ dist/
 build/
 
 # Config files and sensitive information
-*.env
+*+.env
 .env.*
 settings.py
 
